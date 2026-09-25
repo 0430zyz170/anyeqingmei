@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>暗夜青梅 · 张泽禹 · 阴湿男鬼</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0b0e0c;
+      background-image: radial-gradient(circle at 20% 30%, #1a2a1f 0%, #030503 90%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', '华文楷体', 'KaiTi', 'Microsoft YaHei', sans-serif;
+      padding: 12px;
+    }
+
+    .game-container {
+      max-width: 560px;
+      width: 100%;
+      height: 95vh;
+      max-height: 820px;
+      background: #0f1612;
+      border-radius: 32px;
+      border: 1px solid #2e4a3a;
+      box-shadow: 0 0 40px rgba(0, 40, 10, 0.8), inset 0 0 20px rgba(30, 70, 40, 0.3);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .game-container::before {
+      content: "";
+      position: absolute;
+      top: -20%; left: -20%;
+      width: 140%; height: 140%;
+      background: radial-gradient(circle at 30% 40%, rgba(40, 70, 45, 0.15), transparent 70%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* 游戏标题栏 */
+    .game-title {
+      padding: 10px 16px 6px;
+      text-align: center;
+      position: relative;
+      z-index: 5;
+      background: #0a100c;
+      border-bottom: 1px solid #1a2e20;
+    }
+
+    .game-title h1 {
+      font-size: 1.1rem;
+      font-weight: 500;
+      letter-spacing: 6px;
+      color: #8fc9a0;
+      text-shadow: 0 0 12px #2e7a49, 0 0 24px #1a4a2a;
+      font-family: '华文楷体', 'KaiTi', serif;
+    }
+
+    .game-title .subtitle {
+      font-size: 0.6rem;
+      color: #3d6b4a;
+      letter-spacing: 3px;
+      margin-top: 2px;
+      text-shadow: 0 0 6px #1a3a24;
+    }
+
+    .player-bar {
+      padding: 10px 16px;
+      background: #0a100c;
+      border-bottom: 1px solid #1e3a28;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+      z-index: 5;
+      flex-wrap: wrap;
+    }
+
+    .avatar-box {
+      width: 50px; height: 50px;
+      border-radius: 50%;
+      background: #1a2a1e;
+      border: 2px solid #3d6b4a;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px;
+      box-shadow: 0 0 12px #1f4a2e;
+      overflow: hidden;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: 0.2s;
+      color: #b3e0c0;
+    }
+    .avatar-box:hover { border-color: #7ab88a; box-shadow: 0 0 20px #2f6e42; }
+    .avatar-box img { width: 100%; height: 100%; object-fit: cover; }
+
+    .id-area { flex: 1; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .player-name {
+      font-size: 1.2rem; font-weight: 600; color: #b8e6c5;
+      letter-spacing: 1px; text-shadow: 0 0 8px #2e7a49;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      max-width: 150px;
+    }
+    .edit-btn {
+      background: #1e2e22; border: 1px solid #3c6b4c; color: #aad6b6;
+      padding: 4px 12px; border-radius: 30px; font-size: 0.72rem;
+      cursor: pointer; transition: 0.2s; font-weight: 500;
+    }
+    .edit-btn:hover { background: #2a4632; border-color: #6fa87e; color: #d4f5df; }
+
+    .stats-bar {
+      display: flex; gap: 14px; font-size: 0.7rem; color: #6f9a7d;
+      padding: 4px 18px 0; z-index: 5; position: relative;
+      background: #0a100c;
+    }
+    .stats-bar span { display: flex; align-items: center; gap: 4px; }
+    .stat-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .dot-aff { background: #4fa86a; box-shadow: 0 0 6px #4fa86a; }
+    .dot-creep { background: #3d6b8a; box-shadow: 0 0 6px #3d6b8a; }
+    .dot-sanity { background: #a86a4f; box-shadow: 0 0 6px #a86a4f; }
+
+    .story-area {
+      flex: 1; overflow-y: auto; padding: 18px 16px 10px;
+      display: flex; flex-direction: column; gap: 14px;
+      scroll-behavior: smooth; position: relative; z-index: 3;
+    }
+    .story-area::-webkit-scrollbar { width: 5px; }
+    .story-area::-webkit-scrollbar-track { background: #0e1812; }
+    .story-area::-webkit-scrollbar-thumb { background: #2c5538; border-radius: 10px; }
+
+    .message {
+      max-width: 92%; padding: 11px 15px; border-radius: 20px;
+      font-size: 0.94rem; line-height: 1.5; word-break: break-word;
+      animation: fadeIn 0.4s ease; position: relative;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    .message.narrator {
+      align-self: flex-start; background: #142018;
+      border-left: 4px solid #3d7a4e; color: #b6d9c0;
+      border-radius: 8px 20px 20px 8px;
+      box-shadow: 0 0 15px rgba(30, 80, 40, 0.3);
+      font-style: italic; max-width: 95%;
+    }
+    .message.zhang {
+      align-self: flex-start; background: #0d1a12;
+      border: 1px solid #2d5538; color: #c2ebd1;
+      border-radius: 20px 8px 20px 20px;
+      box-shadow: 0 0 18px #1c3d26 inset, 0 0 10px #0c1f12;
+      font-weight: 500;
+    }
+    .message.zhang::before {
+      content: "👻"; position: absolute; left: -12px; top: 8px;
+      font-size: 15px; filter: drop-shadow(0 0 6px #4a9e5e); opacity: 0.8;
+    }
+    .message.player {
+      align-self: flex-end; background: #1b3223;
+      border-right: 4px solid #59a06b; color: #daf5e2;
+      border-radius: 20px 8px 8px 20px;
+      box-shadow: 0 0 14px #1d4028; margin-left: auto;
+    }
+    .message.system {
+      align-self: center; background: #101c14;
+      border: 1px dashed #3c7050; color: #91bfa1;
+      font-size: 0.82rem; padding: 8px 16px; border-radius: 40px;
+      text-align: center; max-width: 92%; letter-spacing: 0.6px;
+    }
+    .message.ending {
+      align-self: center; background: #0d1f14;
+      border: 2px solid #4a9e5e; color: #d4f5df;
+      padding: 14px 20px; border-radius: 20px;
+      text-align: center; max-width: 95%; font-weight: 600;
+      box-shadow: 0 0 30px #1f4a2e, inset 0 0 20px #0a1a0f;
+      animation: glow 2s infinite alternate;
+    }
+    @keyframes glow {
+      from { box-shadow: 0 0 20px #1f4a2e, inset 0 0 15px #0a1a0f; }
+      to { box-shadow: 0 0 40px #2d7a42, inset 0 0 25px #0f2a16; }
+    }
+
+    .choices-area {
+      padding: 12px 16px 18px; background: #0b120e;
+      border-top: 1px solid #1e3827; display: flex;
+      flex-direction: column; gap: 8px;
+      position: relative; z-index: 5;
+      max-height: 45vh; overflow-y: auto;
+    }
+    .choices-area::-webkit-scrollbar { width: 4px; }
+    .choices-area::-webkit-scrollbar-thumb { background: #2c5538; border-radius: 10px; }
+
+    .choice-btn {
+      background: #121f17; border: 1px solid #2d5639; color: #b0d6bb;
+      padding: 12px 16px; border-radius: 40px; font-size: 0.9rem;
+      text-align: left; cursor: pointer; transition: 0.2s;
+      font-family: inherit; letter-spacing: 0.3px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+      display: flex; align-items: center; gap: 8px; font-weight: 500;
+      line-height: 1.4;
+    }
+    .choice-btn:hover {
+      background: #1e3626; border-color: #5b9e70;
+      color: #e2ffe9; box-shadow: 0 0 16px #245e34;
+      transform: scale(1.01);
+    }
+    .choice-btn:active { transform: scale(0.99); }
+    .choice-btn .tag {
+      font-size: 0.65rem; padding: 2px 8px; border-radius: 20px;
+      background: #1a3a24; color: #7ab88a; border: 1px solid #2d5538;
+      margin-left: auto; flex-shrink: 0;
+    }
+    .choice-btn .tag.new { background: #2a1a3a; color: #b88ae6; border-color: #55386b; }
+    .choice-btn .tag.end { background: #3a1a1a; color: #e68a8a; border-color: #6b3838; }
+
+    .custom-area { display: flex; gap: 8px; margin-top: 2px; }
+    .custom-input {
+      flex: 1; background: #0d1611; border: 1px solid #2d5639;
+      border-radius: 40px; padding: 11px 16px; color: #c6f0d3;
+      font-family: inherit; font-size: 0.88rem; outline: none;
+      transition: 0.2s; box-shadow: inset 0 0 12px #0c1a10;
+    }
+    .custom-input::placeholder { color: #4b6f58; font-style: italic; }
+    .custom-input:focus { border-color: #6fae83; box-shadow: 0 0 16px #235a33, inset 0 0 8px #0e1f12; }
+    .custom-submit {
+      background: #1d3526; border: 1px solid #4d8a60; color: #b8e6c7;
+      padding: 0 18px; border-radius: 40px; font-weight: 600;
+      cursor: pointer; font-family: inherit; font-size: 0.88rem;
+      transition: 0.2s; white-space: nowrap;
+    }
+    .custom-submit:hover { background: #2b523a; color: #e2ffe9; box-shadow: 0 0 18px #2d7541; }
+
+    .toast-edit {
+      position: absolute; top: 100px; left: 50%; transform: translateX(-50%);
+      background: #152619; border: 1px solid #4a865b; border-radius: 28px;
+      padding: 16px 20px; display: flex; flex-direction: column; gap: 10px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.9), 0 0 30px #1e4629;
+      z-index: 100; width: 280px; backdrop-filter: blur(10px);
+    }
+    .toast-edit input {
+      background: #0d1710; border: 1px solid #367a48; border-radius: 30px;
+      padding: 9px 15px; color: #c6f0d3; font-family: inherit;
+      outline: none; font-size: 0.88rem;
+    }
+    .toast-edit .row-btns { display: flex; gap: 10px; justify-content: flex-end; }
+    .toast-edit button {
+      background: #1c3526; border: 1px solid #4f8a60; border-radius: 30px;
+      padding: 7px 16px; color: #b8e6c5; font-weight: 500;
+      cursor: pointer; font-family: inherit; transition: 0.2s;
+    }
+    .toast-edit button:hover { background: #2b543a; box-shadow: 0 0 12px #2a6d3e; }
+    .hidden { display: none !important; }
+
+    .line-indicator {
+      font-size: 0.7rem; color: #5a8a68; text-align: center;
+      padding: 4px; letter-spacing: 1px; z-index: 5;
+      background: #0a100c; border-bottom: 1px solid #142a1c;
+    }
+  </style>
+</head>
+<body>
+<div class="game-container" id="gameContainer">
+
+  <!-- 游戏标题 -->
+  <div class="game-title">
+    <h1>暗夜青梅</h1>
+    <div class="subtitle">— 张泽禹 · 阴湿男鬼 —</div>
+  </div>
+
+  <div class="player-bar">
+    <div class="avatar-box" id="avatarDisplay" title="点击修改头像">👤</div>
+    <div class="id-area">
+      <span class="player-name" id="playerNameDisplay">林小雾</span>
+      <button class="edit-btn" id="editProfileBtn">改ID/头像</button>
+    </div>
+  </div>
+  <div class="stats-bar" id="statsBar">
+    <span><span class="stat-dot dot-aff"></span> 好感 <b id="affVal">5</b></span>
+    <span><span class="stat-dot dot-creep"></span> 阴湿 <b id="creepVal">7</b></span>
+    <span><span class="stat-dot dot-sanity"></span> 理智 <b id="sanityVal">10</b></span>
+  </div>
+  <div class="line-indicator" id="lineIndicator">📖 主线 · 老宅重逢</div>
+
+  <div class="toast-edit hidden" id="editPopup">
+    <input type="text" id="newNameInput" placeholder="输入新ID (1-10字)" maxlength="12" value="林小雾">
+    <input type="text" id="newAvatarInput" placeholder="输入emoji或图片链接" value="👤">
+    <div class="row-btns">
+      <button id="cancelEditBtn">取消</button>
+      <button id="confirmEditBtn">确定</button>
+    </div>
+  </div>
+
+  <div class="story-area" id="storyArea"></div>
+  <div class="choices-area" id="choicesArea"></div>
+</div>
+
+<script>
+(function(){
+  // ============ 游戏状态 ============
+  let playerName = "林小雾";
+  let playerAvatar = "👤";
+  let affection = 5;
+  let creepiness = 7;
+  let sanity = 10;
+  let currentLine = "main";
+  let flags = {};
+  let storyLog = [];
+
+  const storyArea = document.getElementById('storyArea');
+  const choicesArea = document.getElementById('choicesArea');
+  const playerNameDisplay = document.getElementById('playerNameDisplay');
+  const avatarDisplay = document.getElementById('avatarDisplay');
+  const editProfileBtn = document.getElementById('editProfileBtn');
+  const editPopup = document.getElementById('editPopup');
+  const newNameInput = document.getElementById('newNameInput');
+  const newAvatarInput = document.getElementById('newAvatarInput');
+  const cancelEditBtn = document.getElementById('cancelEditBtn');
+  const confirmEditBtn = document.getElementById('confirmEditBtn');
+  const affVal = document.getElementById('affVal');
+  const creepVal = document.getElementById('creepVal');
+  const sanityVal = document.getElementById('sanityVal');
+  const lineIndicator = document.getElementById('lineIndicator');
+
+  // ============ 工具函数 ============
+  function updatePlayerUI() {
+    playerNameDisplay.textContent = playerName;
+    if (playerAvatar.startsWith('http') || playerAvatar.startsWith('data:image')) {
+      avatarDisplay.innerHTML = `<img src="${playerAvatar}" alt="avatar" onerror="this.style.display='none'; this.parentElement.textContent='👤'">`;
+    } else {
+      avatarDisplay.textContent = playerAvatar;
+    }
+    newNameInput.value = playerName;
+    newAvatarInput.value = playerAvatar;
+  }
+
+  function updateStats() {
+    affVal.textContent = affection;
+    creepVal.textContent = creepiness;
+    sanityVal.textContent = sanity;
+  }
+
+  function clampStats() {
+    affection = Math.max(0, Math.min(10, affection));
+    creepiness = Math.max(0, Math.min(10, creepiness));
+    sanity = Math.max(0, Math.min(10, sanity));
+    updateStats();
+  }
+
+  function setLine(name, label) {
+    currentLine = name;
+    lineIndicator.textContent = `📖 ${label}`;
+  }
+
+  function addMessage(type, text) {
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `message ${type}`;
+    msgDiv.innerHTML = text;
+    storyArea.appendChild(msgDiv);
+    storyArea.scrollTop = storyArea.scrollHeight;
+    storyLog.push({type, text});
+  }
+
+  function clearStory() {
+    storyArea.innerHTML = '';
+    storyLog = [];
+  }
+
+  // ============ 自定义判定 ============
+  function judgeCustomAction(input) {
+    const lower = input.toLowerCase();
+
+    if (lower.includes('张泽禹') || lower.includes('泽禹') || lower.includes('小禹')) {
+      if (lower.includes('喜欢') || lower.includes('爱') || lower.includes('贴贴')) {
+        affection = Math.min(10, affection + 1); clampStats();
+        return '“你终于说出口了…” 他冰凉的手指轻轻勾住你的衣角，鬼气凝成细小的水珠，落在你手背。';
+      }
+      if (lower.includes('怕') || lower.includes('害怕') || lower.includes('恐怖')) {
+        creepiness = Math.min(10, creepiness + 1); sanity = Math.max(0, sanity - 1); clampStats();
+        return '他歪了歪头，湿漉漉的发梢滴下暗色的水：“你怕我？……可你小时候明明总是往我怀里钻。”';
+      }
+      if (lower.includes('鬼') || lower.includes('阴间') || lower.includes('湿')) {
+        creepiness = Math.min(10, creepiness + 1); clampStats();
+        return '他低低地笑，嘴角渗出一点暗色的水痕：“是，我是阴湿的鬼……可我只想缠着你一个人。”';
+      }
+      if (lower.includes('对不起') || lower.includes('抱歉')) {
+        return '他沉默了很久，水滴顺着下颌滑落：“……你没有什么对不起我的。是我自己，非要等你。”';
+      }
+      return '他透明的指尖拂过你的脸颊，留下湿冷的触感：“我在听……你继续说。”';
+    }
+
+    if (lower.includes('离开') || lower.includes('走') || lower.includes('逃') || lower.includes('跑')) {
+      if (affection > 6) {
+        creepiness = Math.min(10, creepiness + 1); clampStats();
+        return '他的鬼气瞬间暴涨，从你脚踝缠上来：“别走……你走了，我就只能把你锁在梦里了。”';
+      } else {
+        sanity = Math.max(0, sanity - 1); clampStats();
+        return '他沉默了很久，水滴顺着他的下颌滑落：“……你也要抛下我了吗？像他们一样。”';
+      }
+    }
+
+    if (lower.includes('井') || lower.includes('水') || lower.includes('淹')) {
+      return '他身形一颤，周围的空气瞬间潮湿得像沉入井底：“……别提那口井。但如果你想知道，我可以带你去看。”';
+    }
+
+    if (lower.includes('纸人') || lower.includes('替身') || lower.includes('代替')) {
+      creepiness = Math.min(10, creepiness + 1); clampStats();
+      return '他的眼神变得幽深，从袖口飘出一片湿透的纸人：“……你发现了。我用纸人替你，可它们都不会笑。”';
+    }
+
+    if (lower.includes('雨') || lower.includes('下雨')) {
+      return '窗外不知何时下起了雨，他站在窗边，雨水穿过他的身体落在地板上：“……每次下雨，我就觉得你该来了。”';
+    }
+
+    if (lower.includes('喜欢') || lower.includes('爱')) {
+      affection = Math.min(10, affection + 1); clampStats();
+      return '你看到他耳根泛起不正常的青灰色，鬼气紊乱了一瞬：“……别说了，再说我就当真了。”';
+    }
+
+    if (lower.includes('讨厌') || lower.includes('烦')) {
+      creepiness = Math.min(10, creepiness + 1); sanity = Math.max(0, sanity - 1); clampStats();
+      return '他的眼神暗下来，周围墙壁渗出水珠：“讨厌？……没关系，我喜欢你就够了。”';
+    }
+
+    if (lower.includes('冷') || lower.includes('冰') || lower.includes('湿')) {
+      return '他握住你的手腕，皮肤湿冷得像井水：“冷吗？……那就多抱一会儿，我捂不热，但可以陪你一起冷。”';
+    }
+
+    if (lower.includes('小时候') || lower.includes('从前') || lower.includes('以前')) {
+      return '他眼神恍惚，周身鬼气散开一点：“小时候……你总说长大了要嫁给我。后来我死了，你却忘了。”';
+    }
+
+    if (lower.includes('手') || lower.includes('牵手') || lower.includes('拉手')) {
+      affection = Math.min(10, affection + 1); clampStats();
+      return '他缓缓伸出手，指间滴着水，在空气中凝成小冰晶：“牵吧……反正我也牵不了太久，会弄湿你。”';
+    }
+
+    if (lower.includes('亲') || lower.includes('吻')) {
+      creepiness = Math.min(10, creepiness + 1); sanity = Math.max(0, sanity - 1); clampStats();
+      return '他凑近，呼出的气息带着井底的阴冷，唇几乎贴上你的：“……你确定？鬼的吻，可是会把你的魂也染湿的。”';
+    }
+
+    if (lower.includes('笑') || lower.includes('开心')) {
+      return '他弯了弯嘴角，笑容像泡在水里很久的纸：“你笑我就开心……虽然我已经忘了怎么真的笑。”';
+    }
+
+    if (lower.includes('哭') || lower.includes('泪')) {
+      return '他抬手想替你擦泪，手指却穿过了你的脸，留下湿痕：“别哭……我连替你擦泪都做不到。”';
+    }
+
+    if (lower.includes('救') || lower.includes('死')) {
+      return '他垂下眼，水滴从睫毛滑落：“那年我为了救你才淹死的……但我从来没后悔过。”';
+    }
+
+    if (lower.includes('往生') || lower.includes('投胎') || lower.includes('超度')) {
+      return '他猛地抓住你的手腕，冰冷刺骨：“……你要超度我？你舍得吗？你舍得让我忘了你吗？”';
+    }
+
+    const defaults = [
+      '他静静地看着你，鬼气在你脚边凝成一摊深色的水渍：“……我在听，你说什么我都听。”',
+      '水滴从天花板上落下来，他站在阴影里：“你主动来找我，我很高兴……虽然我这副样子只会弄湿你。”',
+      '他慢慢飘近，湿冷的空气包裹住你：“别怕……我只是太寂寞了，这么多年，只有你还记得我。”',
+      '他微微侧头，发梢滴落的液体在地面汇成一小片：“你想做什么都可以……只要别离开这间屋子。”',
+      '他歪着头看你，鬼气在指尖绕成小小的漩涡：“你说话的时候，我就觉得井水也没那么冷了。”'
+    ];
+    return defaults[Math.floor(Math.random() * defaults.length)];
+  }
+
+  function triggerCustomReaction(input, response) {
+    if (input.includes('井') || input.includes('水') || input.includes('淹')) {
+      if (currentLine !== 'well') { setTimeout(() => startWellLine(), 500); return; }
+    }
+    if (input.includes('雨') || input.includes('下雨')) {
+      if (currentLine !== 'rainy') { setTimeout(() => startRainyLine(), 500); return; }
+    }
+    if (input.includes('纸人') || input.includes('替身')) {
+      if (currentLine !== 'paper') { setTimeout(() => startPaperLine(), 500); return; }
+    }
+    if (currentLine === 'main') pushMainChoices('afterCustom');
+    else if (currentLine === 'well') pushWellChoices('afterCustom');
+    else if (currentLine === 'rainy') pushRainyChoices('afterCustom');
+    else if (currentLine === 'paper') pushPaperChoices('afterCustom');
+  }
+
+  // ============ 渲染选项 ============
+  function renderChoices(choices) {
+    choicesArea.innerHTML = '';
+    choices.forEach((choice) => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      let html = choice.text;
+      if (choice.tag) {
+        const tagClass = choice.tag === '新线' ? 'new' : (choice.tag === '结局' ? 'end' : '');
+        html += `<span class="tag ${tagClass}">${choice.tag}</span>`;
+      }
+      btn.innerHTML = html;
+      btn.addEventListener('click', () => {
+        addMessage('player', `🔹 ${choice.text.replace(/<[^>]*>/g, '')}`);
+        if (typeof choice.action === 'function') choice.action();
+      });
+      choicesArea.appendChild(btn);
+    });
+
+    const customDiv = document.createElement('div');
+    customDiv.className = 'custom-area';
+    const input = document.createElement('input');
+    input.className = 'custom-input';
+    input.placeholder = '自定义行动… (系统判定)';
+    input.maxLength = 40;
+    const submitBtn = document.createElement('button');
+    submitBtn.className = 'custom-submit';
+    submitBtn.textContent = '行动';
+
+    const handleCustom = () => {
+      const val = input.value.trim();
+      if (val === '') return;
+      addMessage('player', `🔸 ${val}`);
+      input.value = '';
+      const response = judgeCustomAction(val);
+      addMessage('system', `⚡ 系统判定: ${response}`);
+      triggerCustomReaction(val, response);
+    };
+    submitBtn.addEventListener('click', handleCustom);
+    input.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleCustom(); });
+    customDiv.appendChild(input);
+    customDiv.appendChild(submitBtn);
+    choicesArea.appendChild(customDiv);
+    choicesArea.scrollTop = 0;
+  }
+
+  // ============ 主线 ============
+  function startMainLine() {
+    setLine('main', '主线 · 老宅重逢');
+    clearStory();
+    addMessage('narrator', '你推开了那扇吱呀作响的木门。老宅里的空气湿冷黏腻，墙角长满墨绿色的青苔。');
+    addMessage('narrator', '张泽禹——你的青梅竹马，在你十二岁那年溺亡于后院的老井。可你总觉得，他从未离开。');
+    addMessage('zhang', '……你终于来了。我等你，等得水都从梦里漫出来了。');
+    pushMainChoices('start');
+  }
+
+  function pushMainChoices(scene) {
+    if (scene === 'start') {
+      renderChoices([
+        { text: '🕯️ 点燃桌上的旧蜡烛', action: () => {
+          addMessage('narrator', '烛火摇曳，照出墙角一道瘦长的影子。');
+          setTimeout(() => { addMessage('zhang', '……火光让我想起以前。你总在停电的时候点蜡烛，然后躲在我身后。'); pushMainChoices('afterLight'); }, 400);
+        }},
+        { text: '💧 走向墙角那摊水渍', action: () => {
+          addMessage('narrator', '你踩进那摊冰冷的积水，水底有什么缠住了你的脚踝。');
+          setTimeout(() => { addMessage('zhang', '别动……让我碰碰你。'); pushMainChoices('touchWater'); }, 400);
+        }},
+        { text: '📖 翻开桌上泛黄的日记', action: () => {
+          addMessage('narrator', '日记的扉页写着你的名字，以及一句“等我回来”。');
+          setTimeout(() => { addMessage('zhang', '别看了……那些都是我没来得及给你的东西。'); pushMainChoices('diary'); }, 400);
+        }},
+        { text: '🪣 问起后院那口老井', tag: '新线', action: () => startWellLine() },
+        { text: '🌧️ 提到今晚的雨', tag: '新线', action: () => startRainyLine() },
+        { text: '🧻 发现袖口掉出的湿纸人', tag: '新线', action: () => startPaperLine() },
+      ]);
+    } else if (scene === 'afterLight') {
+      renderChoices([
+        { text: '“张泽禹，我来看你了。”', action: () => {
+          addMessage('zhang', '他缓缓从阴影里走出来，浑身湿透，眉眼却还是你记忆里的样子。“你……记得我的名字。”');
+          setTimeout(() => { affection += 1; clampStats(); pushMainChoices('talk1'); }, 400);
+        }},
+        { text: '“你身上好湿……冷吗？”', action: () => {
+          addMessage('zhang', '他愣了一下，随即笑了，笑容带着水汽：“冷……但你能来，我就不冷了。”');
+          setTimeout(() => { affection += 1; clampStats(); pushMainChoices('talk2'); }, 400);
+        }},
+      ]);
+    } else if (scene === 'touchWater') {
+      renderChoices([
+        { text: '挣扎着往后退', action: () => {
+          addMessage('zhang', '脚踝上的力道松开了，他站在水里，眼神受伤：“……果然，你也怕我。”');
+          setTimeout(() => { sanity -= 1; clampStats(); pushMainChoices('fear'); }, 400);
+        }},
+        { text: '蹲下来，把手伸进水里', action: () => {
+          addMessage('zhang', '他的手从水底握住你，冰冷的指尖扣紧：“……你小时候也这样，总在水坑里找我。”');
+          setTimeout(() => { affection += 2; clampStats(); pushMainChoices('intimate'); }, 400);
+        }},
+      ]);
+    } else if (scene === 'diary') {
+      renderChoices([
+        { text: '翻到最后一页', action: () => {
+          addMessage('narrator', '最后一页写着：“如果能再见你，哪怕变成鬼，我也要缠着你。”');
+          addMessage('zhang', '……别看了。现在你知道了，我就是这么一个阴湿的鬼。');
+          setTimeout(() => { creepiness += 1; clampStats(); pushMainChoices('confession'); }, 400);
+        }},
+        { text: '合上日记，看向他', action: () => {
+          addMessage('zhang', '他别过脸，水滴顺着脖颈流下：“……你都知道了吧。那就别给我希望，又丢下我。”');
+          setTimeout(() => pushMainChoices('confession'), 400);
+        }},
+      ]);
+    } else if (scene === 'talk1' || scene === 'talk2') {
+      renderChoices([
+        { text: '“我不会再丢下你了。”', action: () => {
+          addMessage('zhang', '他猛地抬头，鬼气翻涌，然后又强自按捺：“……别骗我。你说的话，我会当真。”');
+          setTimeout(() => { affection += 2; clampStats(); pushMainChoices('promise'); }, 400);
+        }},
+        { text: '“可是人鬼殊途……”', action: () => {
+          addMessage('zhang', '他低下头，水流从发梢滴落：“……我知道。所以一开始，我就没打算让你走。”');
+          setTimeout(() => { creepiness += 2; clampStats(); pushMainChoices('dark'); }, 400);
+        }},
+      ]);
+    } else if (scene === 'fear') {
+      renderChoices([
+        { text: '还是心软，回头看他', action: () => {
+          addMessage('zhang', '他孤零零站在水里，像被遗弃的小狗：“……你回头了。那我就当，你还有一点舍不得。”');
+          setTimeout(() => { affection += 1; clampStats(); pushMainChoices('soft'); }, 400);
+        }},
+        { text: '头也不回地跑出老宅', action: () => endingEscape() },
+      ]);
+    } else if (scene === 'love') {
+      renderChoices([
+        { text: '主动抱住他湿冷的身体', action: () => {
+          addMessage('zhang', '他浑身一僵，鬼气像潮水一样裹住你：“……好冷，别碰我。可是……你抱紧点。”');
+          setTimeout(() => endingWarm(), 500);
+        }},
+        { text: '轻轻吻他的嘴角', action: () => {
+          addMessage('zhang', '他的嘴唇像冰，却带着井水的甘冽：“……你把魂弄湿了，以后只能和我一起做鬼了。”');
+          setTimeout(() => endingEternal(), 500);
+        }},
+      ]);
+    } else if (scene === 'default' || scene === 'afterCustom') {
+      renderChoices([
+        { text: '拉住他滴水的衣袖', action: () => {
+          addMessage('zhang', '他低头看着你攥住的那片湿漉漉的布料，声音发哑：“……别松手。”');
+          setTimeout(() => pushMainChoices('promise'), 400);
+        }},
+        { text: '轻声哼起小时候的歌', action: () => {
+          addMessage('zhang', '他闭上眼睛，水滴从睫毛滑落：“……好久没听你唱了。再多唱一会儿。”');
+          setTimeout(() => { affection += 1; clampStats(); pushMainChoices('intimate'); }, 400);
+        }},
+      ]);
+    } else if (scene === 'promise') {
+      renderChoices([
+        { text: '“我以后每天都来。”', action: () => {
+          addMessage('zhang', '他笑了，湿漉漉的头发贴在脸上：“……我会等。即使你忘了，我也等。”');
+          setTimeout(() => endingWarm(), 500);
+        }},
+        { text: '“你愿意跟我走吗？”', action: () => {
+          addMessage('zhang', '他摇摇头：“我离不开这栋宅子。但你可以留下……永远留下。”');
+          setTimeout(() => pushMainChoices('dark'), 500);
+        }},
+      ]);
+    } else if (scene === 'intimate') {
+      renderChoices([
+        { text: '靠近他，感受阴冷的体温', action: () => {
+          addMessage('zhang', '他的呼吸在你颈侧，带着潮湿的凉意：“……你心跳好快。我很喜欢。”');
+          setTimeout(() => endingWarm(), 500);
+        }},
+        { text: '问起当年的事', action: () => {
+          addMessage('zhang', '他沉默片刻，水滴打湿了你的衣领：“那年我为了救你……淹死在井里。可你好像忘了。”');
+          setTimeout(() => pushMainChoices('confession'), 500);
+        }},
+      ]);
+    } else if (scene === 'dark') {
+      renderChoices([
+        { text: '“那就把我留下吧。”', action: () => {
+          addMessage('zhang', '他的眼睛亮起来，鬼气从四面八方涌来：“……你说的。那以后，你就是我的了。”');
+          setTimeout(() => endingEternal(), 500);
+        }},
+        { text: '害怕地后退', action: () => {
+          addMessage('zhang', '他表情一暗，水流从门缝渗进来：“……晚了。你已经说了那句话。”');
+          setTimeout(() => endingEternal(), 500);
+        }},
+      ]);
+    } else if (scene === 'soft') {
+      renderChoices([
+        { text: '“明天我还来。”', action: () => {
+          addMessage('zhang', '他点点头，笑容苍白得像水底的花：“……好。我等你。别骗我。”');
+          setTimeout(() => pushMainChoices('promise'), 400);
+        }},
+        { text: '跑过去牵他的手', action: () => {
+          addMessage('zhang', '他接住你的手，冰冷却用力：“……别跑，小心摔。我会心疼的。”');
+          setTimeout(() => endingWarm(), 500);
+        }},
+      ]);
+    } else if (scene === 'confession') {
+      renderChoices([
+        { text: '“我喜欢你，不管你是人是鬼。”', action: () => {
+          addMessage('zhang', '他张开嘴，水滴从眼角滑落：“……你这句话，让我等了好久。”');
+          setTimeout(() => { affection = 10; clampStats(); endingWarm(); }, 500);
+        }},
+        { text: '“对不起，我要走了。”', action: () => endingEscape() },
+      ]);
+    }
+  }
+
+  // ============ 井底线 ============
+  function startWellLine() {
+    setLine('well', '支线 · 井底记忆');
+    clearStory();
+    addMessage('narrator', '你提起那口老井。张泽禹的鬼气骤然翻涌，整个房间像被水淹没了一样潮湿。');
+    addMessage('zhang', '……你要去看那口井吗？我就是在那里……变成现在这样的。');
+    addMessage('narrator', '他向你伸出手，指尖滴下的水珠在半空中凝成一条细线，指向后院。');
+    pushWellChoices('start');
+  }
+
+  function pushWellChoices(scene) {
+    if (scene === 'start') {
+      renderChoices([
+        { text: '🕳️ 跟他走向后院的老井', action: () => {
+          addMessage('narrator', '井口被青苔覆盖，井水漆黑如墨。你探头往下看，水面上浮着一张苍白的脸。');
+          addMessage('zhang', '那就是我……十二岁的我。那天你掉进井里，我跳下去把你推上来，自己却没力气了。');
+          setTimeout(() => pushWellChoices('memory'), 500);
+        }},
+        { text: '💧 伸手触碰井水', action: () => {
+          addMessage('narrator', '指尖刚碰到水面，无数画面涌入脑海——你落水、他跳下、他沉底……');
+          addMessage('zhang', '别看了……那些记忆太冷了，会把你冻伤的。');
+          setTimeout(() => { sanity -= 1; clampStats(); pushWellChoices('memory'); }, 500);
+        }},
+        { text: '🪢 后退，不想回忆', action: () => {
+          addMessage('zhang', '他收回手，水珠落回井里：“……也好。那些事，我一个人记得就够了。”');
+          setTimeout(() => { affection -= 1; clampStats(); pushWellChoices('avoid'); }, 400);
+        }},
+      ]);
+    } else if (scene === 'memory') {
+      renderChoices([
+        { text: '“是你救了我……对不起。”', action: () => {
+          addMessage('zhang', '他摇摇头，水滴从发梢滴落：“不用对不起。我自愿的。我只是……舍不得你。”');
+          setTimeout(() => { affection += 2; clampStats(); pushWellChoices('forgive'); }, 500);
+        }},
+        { text: '“那口井……我能为你做什么？”', action: () => {
+          addMessage('zhang', '他沉默了很久，井水开始翻涌：“……把我捞出来。我的骨头还在井底。”');
+          setTimeout(() => { creepiness += 2; clampStats(); pushWellChoices('bones'); }, 500);
+        }},
+        { text: '“我想起来了……我全都想起来了。”', action: () => {
+          addMessage('narrator', '记忆如潮水般涌回。你想起他沉入井底前最后的口型——“活下去”。');
+          addMessage('zhang', '他怔怔地看着你，鬼气剧烈波动：“……你终于想起来了。”');
+          setTimeout(() => { sanity -= 2; affection += 3; clampStats(); pushWellChoices('remember'); }, 500);
+        }},
+      ]);
+    } else if (scene === 'avoid') {
+      renderChoices([
+        { text: '“不，我要知道真相。”', action: () => {
+          addMessage('zhang', '他深深看了你一眼，转身走向后院：“……跟上来。但别后悔。”');
+          setTimeout(() => pushWellChoices('memory'), 500);
+        }},
+        { text: '“过去的事就让它过去吧。”', action: () => {
+          addMessage('zhang', '他点点头，笑容淡得像水渍：“……好。那我们说点别的。”');
+          setTimeout(() => pushMainChoices('default'), 500);
+        }},
+      ]);
+    } else if (scene === 'forgive') {
+      renderChoices([
+        { text: '“我带你离开这口井。”', action: () => {
+          addMessage('zhang', '他愣住了，井水突然变得清澈：“……你说什么？我……可以离开吗？”');
+          setTimeout(() => endingRebirth(), 600);
+        }},
+        { text: '“但我还是怕……”', action: () => {
+          addMessage('zhang', '他眼中的光暗下去：“……没关系。怕才是正常的。我本来就不该存在。”');
+          setTimeout(() => { sanity -= 1; clampStats(); endingEternal(); }, 600);
+        }},
+      ]);
+    } else if (scene === 'bones') {
+      renderChoices([
+        { text: '🦴 下井捞出他的遗骨', action: () => {
+          addMessage('narrator', '你顺着井绳下到井底，在淤泥中摸到一具小小的白骨。');
+          addMessage('zhang', '井口传来他的声音，带着哭腔：“……你真的下来了。你知不知道这有多危险！”');
+          setTimeout(() => endingRebirth(), 700);
+        }},
+        { text: '“我做不到……对不起。”', action: () => {
+          addMessage('zhang', '他闭上眼，井水重新变得漆黑：“……没关系。我习惯了。反正已经等了这么多年。”');
+          setTimeout(() => endingEternal(), 600);
+        }},
+      ]);
+    } else if (scene === 'remember') {
+      renderChoices([
+        { text: '“这次换我来救你。”', action: () => {
+          addMessage('narrator', '你抓住他的手，用尽全力把他从井水的幻象中拉出来。');
+          addMessage('zhang', '他跌坐在井边，浑身湿透，却第一次露出了真正的笑容：“……你拉我上来了。”');
+          setTimeout(() => endingRebirth(), 700);
+        }},
+        { text: '“我们一起沉下去吧。”', action: () => {
+          addMessage('zhang', '他的瞳孔骤缩，井水漫过你们两人的脚踝：“……你说真的？”');
+          setTimeout(() => endingTogether(), 700);
+        }},
+      ]);
+    } else if (scene === 'afterCustom') {
+      renderChoices([
+        { text: '继续走向井边', action: () => pushWellChoices('memory') },
+        { text: '回到老宅', action: () => { setLine('main', '主线 · 老宅重逢'); pushMainChoices('default'); } },
+      ]);
+    }
+  }
+
+  // ============ 雨夜线 ============
+  function startRainyLine() {
+    setLine('rainy', '支线 · 雨夜访客');
+    clearStory();
+    addMessage('narrator', '窗外忽然下起了大雨。雨声淅沥，老宅的屋顶开始漏水，水滴在地板上汇成小小的水洼。');
+    addMessage('zhang', '……下雨了。每次下雨，我都觉得你会来。因为你走的那天，也下着这么大的雨。');
+    pushRainyChoices('start');
+  }
+
+  function pushRainyChoices(scene) {
+    if (scene === 'start') {
+      renderChoices([
+        { text: '🌧️ 走到窗边，和他一起看雨', action: () => {
+          addMessage('narrator', '你们并肩站在窗前。雨水穿过他的身体，在窗台上汇成细流。');
+          addMessage('zhang', '如果我还活着，现在应该会把你搂进怀里，不让雨淋到你。');
+          setTimeout(() => { affection += 1; clampStats(); pushRainyChoices('window'); }, 500);
+        }},
+        { text: '☂️ 问他那天发生了什么', action: () => {
+          addMessage('zhang', '他沉默了很久，雨水从屋檐滴落，像一串串泪：“那天……你跑出去，我追你，然后……”');
+          setTimeout(() => pushRainyChoices('flashback'), 500);
+        }},
+        { text: '🔥 生一盆火，让他暖和一点', action: () => {
+          addMessage('narrator', '你点燃旧火盆。火光映在他脸上，他的轮廓似乎清晰了一点。');
+          addMessage('zhang', '他伸手靠近火焰，手指却穿过火光：“……谢谢你。虽然我感受不到温度，但火光让我觉得……还活着。”');
+          setTimeout(() => { affection += 2; creepiness -= 1; clampStats(); pushRainyChoices('fire'); }, 500);
+        }},
+      ]);
+    } else if (scene === 'window') {
+      renderChoices([
+        { text: '“如果时间能倒流……”', action: () => {
+          addMessage('zhang', '他轻轻摇头，雨水穿过他的肩膀：“……别想那些。现在你能站在这里，我已经很满足了。”');
+          setTimeout(() => pushRainyChoices('accept'), 500);
+        }},
+        { text: '“我现在就在你身边。”', action: () => {
+          addMessage('zhang', '他转过头看你，雨水和泪水混在一起：“……这句话，够我再撑十年。”');
+          setTimeout(() => { affection += 2; clampStats(); endingWarm(); }, 600);
+        }},
+      ]);
+    } else if (scene === 'flashback') {
+      renderChoices([
+        { text: '“你是为了追我才……”', action: () => {
+          addMessage('zhang', '他点头，雨水冲刷着他透明的脸庞：“……我怕你淋雨。结果自己掉进了井里。”');
+          setTimeout(() => { sanity -= 1; affection += 2; clampStats(); pushRainyChoices('accept'); }, 500);
+        }},
+        { text: '“为什么不告诉我？”', action: () => {
+          addMessage('zhang', '他苦笑，水滴从下颌滑落：“……告诉你又能怎样？让你内疚一辈子吗？”');
+          setTimeout(() => pushRainyChoices('accept'), 500);
+        }},
+      ]);
+    } else if (scene === 'fire') {
+      renderChoices([
+        { text: '“以后每个雨夜我都来陪你。”', action: () => {
+          addMessage('zhang', '他凑近火盆，湿漉漉的头发被烤得微微卷曲：“……好。我会数着雨声等你。”');
+          setTimeout(() => endingWarm(), 600);
+        }},
+        { text: '“你能不能……试着离开这里？”', action: () => {
+          addMessage('zhang', '他伸手触碰火焰，手指却穿了过去：“……我试过。但每次走到门口，就会被拉回来。”');
+          setTimeout(() => endingEternal(), 600);
+        }},
+      ]);
+    } else if (scene === 'accept') {
+      renderChoices([
+        { text: '“那就让我陪你到最后。”', action: () => endingWarm() },
+        { text: '“我想帮你解脱。”', action: () => endingRebirth() },
+      ]);
+    } else if (scene === 'afterCustom') {
+      renderChoices([
+        { text: '继续看雨', action: () => pushRainyChoices('window') },
+        { text: '回到老宅', action: () => { setLine('main', '主线 · 老宅重逢'); pushMainChoices('default'); } },
+      ]);
+    }
+        }// ============ 纸人线 ============
+  function startPaperLine() {
+    setLine('paper', '支线 · 纸人替身');
+    clearStory();
+    addMessage('narrator', '你注意到他的袖口露出一角湿透的纸。你抽出来一看——是一个小小的纸人，眉眼竟和你一模一样。');
+    addMessage('zhang', '他猛地想抢回去，鬼气剧烈波动：“……还给我。那不是你该看的东西。”');
+    pushPaperChoices('start');
+  }
+
+  function pushPaperChoices(scene) {
+    if (scene === 'start') {
+      renderChoices([
+        { text: '🧻 展开纸人仔细看', action: () => {
+          addMessage('narrator', '纸人上写着你的名字和生辰八字。背面还有一行小字：“替她活，替她笑，替她陪我。”');
+          addMessage('zhang', '他垂下头，水滴从发梢滴落：“……我只是太想你了。所以做了纸人，假装你还在。”');
+          setTimeout(() => { creepiness += 2; clampStats(); pushPaperChoices('truth'); }, 500);
+        }},
+        { text: '🔥 把纸人烧掉', action: () => {
+          addMessage('narrator', '纸人在你手中化为灰烬。张泽禹发出一声几不可闻的呜咽，鬼气瞬间萎靡。');
+          addMessage('zhang', '……你烧了它。那是我唯一能骗自己的东西。');
+          setTimeout(() => { sanity -= 2; creepiness += 1; clampStats(); pushPaperChoices('burned'); }, 500);
+        }},
+        { text: '💧 把纸人还给他', action: () => {
+          addMessage('zhang', '他小心翼翼地接过纸人，湿漉漉的手指把它贴在心口：“……谢谢。它虽然不会说话，但至少……像你。”');
+          setTimeout(() => pushPaperChoices('returned'), 500);
+        }},
+      ]);
+    } else if (scene === 'truth') {
+      renderChoices([
+        { text: '“我在这里，不需要替身。”', action: () => {
+          addMessage('zhang', '他抬起头，眼中水光闪烁：“……你说真的？你不会像上次一样，突然消失？”');
+          setTimeout(() => { affection += 3; clampStats(); pushPaperChoices('real'); }, 500);
+        }},
+        { text: '“你做了多少个这样的纸人？”', action: () => {
+          addMessage('narrator', '他打开柜子，里面整整齐齐摆着几十个纸人，每一个都和你一模一样。');
+          addMessage('zhang', '……每年一个。从你离开那年开始。');
+          setTimeout(() => { creepiness += 3; sanity -= 2; clampStats(); pushPaperChoices('many'); }, 500);
+        }},
+      ]);
+    } else if (scene === 'burned') {
+      renderChoices([
+        { text: '“对不起……我只是不想你活在幻觉里。”', action: () => {
+          addMessage('zhang', '他沉默了很久，鬼气渐渐平复：“……我知道。你说得对。纸人终究不是你。”');
+          setTimeout(() => pushPaperChoices('real'), 500);
+        }},
+        { text: '“以后我当你的纸人。”', action: () => {
+          addMessage('zhang', '他猛地抬头，眼中闪过一丝疯狂的光：“……你说什么？你愿意……留下来？”');
+          setTimeout(() => { creepiness += 2; clampStats(); endingEternal(); }, 600);
+        }},
+      ]);
+    } else if (scene === 'returned') {
+      renderChoices([
+        { text: '“但我不是纸人，我是真的。”', action: () => {
+          addMessage('zhang', '他握紧纸人，又慢慢松开：“……我知道。可是真的你，总有一天会离开。”');
+          setTimeout(() => pushPaperChoices('real'), 500);
+        }},
+        { text: '“让我代替它，陪着你。”', action: () => {
+          addMessage('zhang', '他怔怔地看着你，鬼气温柔地缠绕上来：“……这句话，我当真了。”');
+          setTimeout(() => endingTogether(), 600);
+        }},
+      ]);
+    } else if (scene === 'real') {
+      renderChoices([
+        { text: '“这一次，我不会再走了。”', action: () => endingWarm() },
+        { text: '“但你要答应我，不再做纸人。”', action: () => {
+          addMessage('zhang', '他点头，把纸人放在烛火上烧掉：“……好。有你在，我不需要替身了。”');
+          setTimeout(() => endingRebirth(), 600);
+        }},
+      ]);
+    } else if (scene === 'many') {
+      renderChoices([
+        { text: '“全都烧掉吧，我陪你重新开始。”', action: () => {
+          addMessage('narrator', '纸人在火盆中燃烧，张泽禹的鬼气渐渐变得清澈。');
+          setTimeout(() => endingRebirth(), 700);
+        }},
+        { text: '“留着吧……但以后由我来陪你。”', action: () => {
+          addMessage('zhang', '他抱住那些纸人，又慢慢松开：“……好。那这些，就当是过去的纪念。”');
+          setTimeout(() => endingWarm(), 700);
+        }},
+      ]);
+    } else if (scene === 'afterCustom') {
+      renderChoices([
+        { text: '继续追问纸人的事', action: () => pushPaperChoices('truth') },
+        { text: '回到老宅', action: () => { setLine('main', '主线 · 老宅重逢'); pushMainChoices('default'); } },
+      ]);
+    }
+  }
+
+  // ============ 结局 ============
+  function endingWarm() {
+    setLine('end', '结局 · 湿漉的温暖');
+    clearStory();
+    addMessage('narrator', '你留了下来。老宅依然阴湿，张泽禹依然浑身滴水，但你们之间多了一盆永远不灭的火。');
+    addMessage('zhang', '他坐在你身边，湿冷的肩膀靠着你的：“……我还是捂不热你，但至少，你不用再一个人淋雨了。”');
+    addMessage('ending', '🔚 结局：湿漉的温暖<br><span style="font-size:0.85rem;font-weight:400;">有些陪伴，阴阳也无法阻隔。你成了老宅的常客，而他终于不再是一个人。</span>');
+    renderEndChoices();
+  }
+
+  function endingEternal() {
+    setLine('end', '结局 · 永远的阴湿');
+    clearStory();
+    addMessage('narrator', '你留在了老宅。日复一日，你的皮肤开始变得湿冷，呼吸也带上井水的腥甜。');
+    addMessage('zhang', '他抱着你，鬼气像茧一样裹住你们：“……你终于和我一样了。这次，谁也不能把你从我身边带走。”');
+    addMessage('ending', '🔚 结局：永远的阴湿<br><span style="font-size:0.85rem;font-weight:400;">你放弃了阳间的一切，成为老宅新的“住户”。直到某天，又一个青梅竹马推开了这扇门……</span>');
+    renderEndChoices();
+  }
+
+  function endingEscape() {
+    setLine('end', '结局 · 永别');
+    clearStory();
+    addMessage('narrator', '你冲出老宅，回头时整栋宅子已经消失，只剩一片潮湿的荒地。');
+    addMessage('narrator', '但你总觉得身后有水声。下雨天，窗玻璃上会浮现一张苍白的脸。');
+    addMessage('ending', '🔚 结局：永别<br><span style="font-size:0.85rem;font-weight:400;">你逃离了阴湿的过去，却永远逃不出那口井的倒影。</span>');
+    renderEndChoices();
+  }
+
+  function endingRebirth() {
+    setLine('end', '结局 · 往生');
+    clearStory();
+    addMessage('narrator', '你把他从井底拉了出来。他的身体渐渐变得透明，却第一次露出了释然的笑容。');
+    addMessage('zhang', '“原来……被拉一把是这种感觉。谢谢你。这次，换我等你。”');
+    addMessage('narrator', '他的身影化作一捧清水，渗入泥土。第二年春天，老宅的院子里开出了一片蓝色的花。');
+    addMessage('ending', '🔚 结局：往生<br><span style="font-size:0.85rem;font-weight:400;">你救赎了他，也救赎了自己。虽然阴阳两隔，但你们终会再见。</span>');
+    renderEndChoices();
+  }
+
+  function endingTogether() {
+    setLine('end', '结局 · 共沉');
+    clearStory();
+    addMessage('narrator', '你握住他的手，和他一起走进那口老井。井水漫过头顶，却没有窒息感。');
+    addMessage('zhang', '他在水下抱住你，湿冷的拥抱却无比安心：“……这次，我们谁也不用等谁了。”');
+    addMessage('ending', '🔚 结局：共沉<br><span style="font-size:0.85rem;font-weight:400;">你放弃了阳间的身份，和他一起沉入井底。在那里，时间停止，只有彼此。</span>');
+    renderEndChoices();
+  }
+
+  function renderEndChoices() {
+    renderChoices([
+      { text: '🔄 重新开始游戏', tag: '结局', action: () => resetGame() },
+      { text: '📜 查看已解锁结局', tag: '结局', action: () => {
+        addMessage('system', '⚡ 已解锁结局：湿漉的温暖 / 永远的阴湿 / 永别 / 往生 / 共沉');
+      }},
+    ]);
+  }
+
+  // ============ 重置 ============
+  function resetGame() {
+    affection = 5; creepiness = 7; sanity = 10;
+    flags = {};
+    clampStats();
+    clearStory();
+    startMainLine();
+  }
+
+  // ============ 初始化 ============
+  function init() {
+    updatePlayerUI();
+    updateStats();
+
+    editProfileBtn.addEventListener('click', () => {
+      editPopup.classList.remove('hidden');
+      newNameInput.value = playerName;
+      newAvatarInput.value = playerAvatar;
+    });
+    avatarDisplay.addEventListener('click', () => {
+      editPopup.classList.remove('hidden');
+      newNameInput.value = playerName;
+      newAvatarInput.value = playerAvatar;
+    });
+    cancelEditBtn.addEventListener('click', () => editPopup.classList.add('hidden'));
+    confirmEditBtn.addEventListener('click', () => {
+      const newName = newNameInput.value.trim() || playerName;
+      const newAvatar = newAvatarInput.value.trim() || playerAvatar;
+      playerName = newName.slice(0, 12);
+      playerAvatar = newAvatar;
+      updatePlayerUI();
+      editPopup.classList.add('hidden');
+      addMessage('system', `⚡ 身份已更新：${playerName} ${playerAvatar}`);
+    });
+
+    resetGame();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
+```
